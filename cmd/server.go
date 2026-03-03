@@ -26,6 +26,7 @@ func init() {
 type session struct {
 	mu      sync.Mutex
 	host    *websocket.Conn
+	hostMu  sync.Mutex // serializes writes to the host conn
 	viewers []*websocket.Conn
 }
 
@@ -161,14 +162,11 @@ func handleViewer(conn *websocket.Conn, id string) {
 			continue
 		}
 
-		s.mu.Lock()
-		host := s.host
-		s.mu.Unlock()
-
-		if host != nil {
-			if err := host.WriteMessage(websocket.BinaryMessage, data); err != nil {
-				return
-			}
+		s.hostMu.Lock()
+		err = s.host.WriteMessage(websocket.BinaryMessage, data)
+		s.hostMu.Unlock()
+		if err != nil {
+			return
 		}
 	}
 }
