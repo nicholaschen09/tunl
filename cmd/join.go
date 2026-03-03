@@ -41,11 +41,14 @@ func runJoin(cmd *cobra.Command, args []string) error {
 	}
 	defer ws.Close()
 
-	oldState, err := term.MakeRaw(int(os.Stdin.Fd()))
-	if err != nil {
-		return fmt.Errorf("make raw: %w", err)
+	isTTY := term.IsTerminal(int(os.Stdin.Fd()))
+	if isTTY {
+		oldState, err := term.MakeRaw(int(os.Stdin.Fd()))
+		if err != nil {
+			return fmt.Errorf("make raw: %w", err)
+		}
+		defer term.Restore(int(os.Stdin.Fd()), oldState)
 	}
-	defer term.Restore(int(os.Stdin.Fd()), oldState)
 
 	done := make(chan struct{})
 

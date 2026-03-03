@@ -66,32 +66,35 @@ func runHost(cmd *cobra.Command, args []string) error {
 	}
 	defer ptmx.Close()
 
-	oldState, err := term.MakeRaw(int(os.Stdin.Fd()))
-	if err != nil {
-		return fmt.Errorf("make raw: %w", err)
-	}
-	defer term.Restore(int(os.Stdin.Fd()), oldState)
+	isTTY := term.IsTerminal(int(os.Stdin.Fd()))
+	if isTTY {
+		oldState, err := term.MakeRaw(int(os.Stdin.Fd()))
+		if err != nil {
+			return fmt.Errorf("make raw: %w", err)
+		}
+		defer term.Restore(int(os.Stdin.Fd()), oldState)
 
-	// Sync initial terminal size to PTY
-	if cols, rows, err := term.GetSize(int(os.Stdin.Fd())); err == nil {
-		pty.Setsize(ptmx, &pty.Winsize{Cols: uint16(cols), Rows: uint16(rows)})
+		if cols, rows, err := term.GetSize(int(os.Stdin.Fd())); err == nil {
+			pty.Setsize(ptmx, &pty.Winsize{Cols: uint16(cols), Rows: uint16(rows)})
+		}
 	}
 
 	fmt.Fprintf(os.Stderr, "\r\nSession ID: %s\r\nShare with: terminal-share join -s %s %s\r\n\r\n", sessionID, hostServer, sessionID)
 
 	done := make(chan struct{})
 
-	// Handle SIGWINCH for terminal resize
-	sigCh := make(chan os.Signal, 1)
-	signal.Notify(sigCh, syscall.SIGWINCH)
-	go func() {
-		for range sigCh {
-			if cols, rows, err := term.GetSize(int(os.Stdin.Fd())); err == nil {
-				pty.Setsize(ptmx, &pty.Winsize{Cols: uint16(cols), Rows: uint16(rows)})
-				ws.WriteMessage(websocket.BinaryMessage, protocol.EncodeResize(uint16(cols), uint16(rows)))
+	if isTTY {
+		sigCh := make(chan os.Signal, 1)
+		signal.Notify(sigCh, syscall.SIGWINCH)
+		go func() {
+			for range sigCh {
+				if cols, rows, err := term.GetSize(int(os.Stdin.Fd())); err == nil {
+					pty.Setsize(ptmx, &pty.Winsize{Cols: uint16(cols), Rows: uint16(rows)})
+					ws.WriteMessage(websocket.BinaryMessage, protocol.EncodeResize(uint16(cols), uint16(rows)))
+				}
 			}
-		}
-	}()
+		}()
+	}
 
 	// PTY output -> local stdout + WS broadcast
 	go func() {
@@ -129,10 +132,11 @@ func runHost(cmd *cobra.Command, args []string) error {
 		}
 	}()
 
-	// Local stdin -> PTY
-	go func() {
-		io.Copy(ptmx, os.Stdin)
-	}()
+	if isTTY {
+		go func() {
+			io.Copy(ptmx, os.Stdin)
+		}()
+	}
 
 	// Wait for the shell to exit
 	<-done
