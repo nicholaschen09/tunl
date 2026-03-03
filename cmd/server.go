@@ -14,9 +14,10 @@ import (
 var serverPort int
 
 var serverCmd = &cobra.Command{
-	Use:   "server",
-	Short: "Start the WebSocket relay server",
-	RunE:  runServer,
+	Use:     "server",
+	Aliases: []string{"srv", "s"},
+	Short:   "Start the WebSocket relay server",
+	RunE:    runServer,
 }
 
 func init() {

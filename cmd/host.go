@@ -22,9 +22,10 @@ import (
 var hostServer string
 
 var hostCmd = &cobra.Command{
-	Use:   "host",
-	Short: "Host a shared terminal session",
-	RunE:  runHost,
+	Use:     "host",
+	Aliases: []string{"h"},
+	Short:   "Host a shared terminal session",
+	RunE:    runHost,
 }
 
 func init() {

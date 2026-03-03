@@ -15,10 +15,11 @@ import (
 var joinServer string
 
 var joinCmd = &cobra.Command{
-	Use:   "join <session-id>",
-	Short: "Join a shared terminal session",
-	Args:  cobra.ExactArgs(1),
-	RunE:  runJoin,
+	Use:     "join <session-id>",
+	Aliases: []string{"j"},
+	Short:   "Join a shared terminal session",
+	Args:    cobra.ExactArgs(1),
+	RunE:    runJoin,
 }
 
 func init() {

@@ -3,7 +3,7 @@ package cmd
 import "github.com/spf13/cobra"
 
 var rootCmd = &cobra.Command{
-	Use:   "terminal-share",
+	Use:   "tshare",
 	Short: "Live-share your terminal over WebSockets",
 }
 
