@@ -5,6 +5,7 @@ import (
 	"io"
 	"net/url"
 	"os"
+	"strings"
 
 	"github.com/gorilla/websocket"
 	"github.com/nicholas/terminal-share/protocol"
@@ -29,8 +30,12 @@ func init() {
 func runJoin(cmd *cobra.Command, args []string) error {
 	sessionID := args[0]
 
+	scheme := "ws"
+	if strings.HasSuffix(joinServer, ":443") || strings.Contains(joinServer, ".ngrok") {
+		scheme = "wss"
+	}
 	u := url.URL{
-		Scheme:   "ws",
+		Scheme:   scheme,
 		Host:     joinServer,
 		Path:     "/ws",
 		RawQuery: fmt.Sprintf("session=%s&role=viewer", sessionID),

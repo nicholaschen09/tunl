@@ -10,6 +10,7 @@ import (
 	"os"
 	"os/exec"
 	"os/signal"
+	"strings"
 	"syscall"
 
 	"github.com/creack/pty"
@@ -41,11 +42,15 @@ func genSessionID() string {
 func runHost(cmd *cobra.Command, args []string) error {
 	sessionID := genSessionID()
 
+	scheme := "ws"
+	if strings.HasSuffix(joinServer, ":443") || strings.Contains(joinServer, ".ngrok") {
+		scheme = "wss"
+	}
 	u := url.URL{
-		Scheme:   "ws",
-		Host:     hostServer,
+		Scheme:   scheme,
+		Host:     joinServer,
 		Path:     "/ws",
-		RawQuery: fmt.Sprintf("session=%s&role=host", sessionID),
+		RawQuery: fmt.Sprintf("session=%s&role=viewer", sessionID),
 	}
 
 	ws, _, err := websocket.DefaultDialer.Dial(u.String(), nil)
