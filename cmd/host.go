@@ -15,7 +15,7 @@ import (
 
 	"github.com/creack/pty"
 	"github.com/gorilla/websocket"
-	"github.com/nicholas/terminal-share/protocol"
+	"github.com/nicholaschen09/tunl/protocol"
 	"github.com/spf13/cobra"
 	"golang.org/x/term"
 )

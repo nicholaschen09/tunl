@@ -1,4 +1,4 @@
-module github.com/nicholas/terminal-share
+module github.com/nicholaschen09/tunl
 
 go 1.24.0
 

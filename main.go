@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/nicholas/terminal-share/cmd"
+	"github.com/nicholaschen09/tunl/cmd"
 )
 
 func main() {
