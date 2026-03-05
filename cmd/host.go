@@ -43,14 +43,14 @@ func runHost(cmd *cobra.Command, args []string) error {
 	sessionID := genSessionID()
 
 	scheme := "ws"
-	if strings.HasSuffix(joinServer, ":443") || strings.Contains(joinServer, ".ngrok") {
+	if strings.HasSuffix(hostServer, ":443") || strings.Contains(hostServer, ".ngrok") {
 		scheme = "wss"
 	}
 	u := url.URL{
 		Scheme:   scheme,
-		Host:     joinServer,
+		Host:     hostServer,
 		Path:     "/ws",
-		RawQuery: fmt.Sprintf("session=%s&role=viewer", sessionID),
+		RawQuery: fmt.Sprintf("session=%s&role=host", sessionID),
 	}
 
 	ws, _, err := websocket.DefaultDialer.Dial(u.String(), nil)
