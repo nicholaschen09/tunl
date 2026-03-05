@@ -47,6 +47,30 @@ tshare join a3f1c2
 
 The viewer sees the host's terminal in real time. 
 
+## Sharing Over the Internet
+
+Use [ngrok](https://ngrok.com) to expose your relay server publicly:
+
+```bash
+# terminal 1 — start the relay
+tshare server
+
+# terminal 2 — tunnel it through ngrok
+ngrok http 8080
+```
+
+ngrok will print a URL like `https://abc123.ngrok-free.app`. Use it with port 443:
+
+```bash
+# terminal 3 — host a session
+tshare host -s abc123.ngrok-free.app:443
+
+# on any other machine — join
+tshare join -s abc123.ngrok-free.app:443 a3f1c2
+```
+
+TLS is auto-detected when the server address uses port 443 or contains `.ngrok`.
+
 ## Architecture
 
 ```
